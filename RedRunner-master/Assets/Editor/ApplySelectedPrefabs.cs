@@ -25,7 +25,6 @@ public class ApplySelectedPrefabs : EditorWindow
 
 		if (tSelection.Length > 0) {
 			GameObject goPrefabRoot;
-			GameObject goParent;
 			GameObject goCur;
 			bool bTopHierarchyFound;
 			int iCount = 0;

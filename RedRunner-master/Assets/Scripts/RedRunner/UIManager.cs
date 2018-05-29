@@ -30,8 +30,6 @@ namespace RedRunner
 		[SerializeField]
 		private Texture2D m_CursorClickTexture;
 		[SerializeField]
-		private float m_CursorHideDelay = 1f;
-		[SerializeField]
 		private UIScreen m_PauseScreen;
 
 		void Awake ()

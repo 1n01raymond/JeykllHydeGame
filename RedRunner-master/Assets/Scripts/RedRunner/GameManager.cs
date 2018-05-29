@@ -178,7 +178,7 @@ namespace RedRunner
 
 		IEnumerator Load ()
 		{
-			yield return new WaitForSecondsRealtime ( 3f );
+			yield return new WaitForSecondsRealtime ( 1f );
 			m_OnLoaded.Invoke ();
 		}
 
@@ -271,26 +271,6 @@ namespace RedRunner
 			{
 				OnReset ();
 			}
-		}
-
-		public void ShareOnTwitter ()
-		{
-			Share ( "https://twitter.com/intent/tweet?text={0}&url={1}" );
-		}
-
-		public void ShareOnGooglePlus ()
-		{
-			Share ( "https://plus.google.com/share?text={0}&href={1}" );
-		}
-
-		public void ShareOnFacebook ()
-		{
-			Share ( "https://www.facebook.com/sharer/sharer.php?u={1}" );
-		}
-
-		public void Share ( string url )
-		{
-			Application.OpenURL ( string.Format ( url, m_ShareText, m_ShareUrl ) );
 		}
 
 		[System.Serializable]
