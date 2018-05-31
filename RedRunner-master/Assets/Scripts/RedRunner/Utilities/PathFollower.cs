@@ -94,7 +94,7 @@ namespace RedRunner.Utilities
 				m_Stopped = false;
 			}
 
-			if (m_CurrentPoint == null || m_CurrentPoint.Current == null || m_Stopped || !GameManager.Singleton.gameRunning) {
+            if (m_CurrentPoint == null || m_CurrentPoint.Current == null || m_Stopped || !GameManager.Instance.gameRunning) {
 				return;
 			}
 

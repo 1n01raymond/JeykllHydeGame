@@ -21,7 +21,7 @@ namespace RedRunner.UI
 
 		public override void OnPointerDown ( UnityEngine.EventSystems.PointerEventData eventData )
 		{
-			GameManager.Singleton.ToggleAudioEnabled ();
+            GameManager.Instance.ToggleAudioEnabled ();
 			base.OnPointerDown ( eventData );
 		}
 

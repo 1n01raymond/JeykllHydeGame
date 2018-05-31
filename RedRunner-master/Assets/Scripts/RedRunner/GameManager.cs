@@ -13,10 +13,8 @@ using RedRunner.TerrainGeneration;
 
 namespace RedRunner
 {
-
 	public sealed class GameManager : MonoBehaviour
 	{
-
 		public delegate void CoinChangedHandler ( int coin );
 
 		public delegate void AudioEnabledHandler ( bool active );
@@ -32,7 +30,7 @@ namespace RedRunner
 
 		private static GameManager m_Singleton;
 
-		public static GameManager Singleton
+		public static GameManager Instance
 		{
 			get
 			{
@@ -58,6 +56,12 @@ namespace RedRunner
 		private bool m_GameStarted = false;
 		private bool m_GameRunning = false;
 		private bool m_AudioEnabled = true;
+
+        public Character MainCharacter{
+            get {
+                return m_MainCharacter;
+            }
+        }
 
 		public int coin
 		{
@@ -278,6 +282,10 @@ namespace RedRunner
 		{
 			
 		}
+
+        public void HandleFaceAPIResult(){
+            
+        }
 
 	}
 

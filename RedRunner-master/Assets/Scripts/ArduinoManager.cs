@@ -6,84 +6,118 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 
-namespace AssemblyCSharp.Assets.Scripts
+namespace RedRunner
 {
-    public class FaceAPIMapper{
-        public string faceId;
-        public Dictionary<string, int> faceRect;
-        public Dictionary<string, Dictionary<string, float>> attribute;
-    }
-
     public class ArduinoManager : MonoBehaviour
     {
-        private static readonly string url = "https://eastasia.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceAttributes=emotion";
-        private static readonly string key = "4c01340088d245a9a7832850a5313107";
+        #region Constants
+        private static readonly string API_URL = "https://eastasia.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceAttributes=emotion";
+        private static readonly string API_KEY = "4c01340088d245a9a7832850a5313107";
+
+        private const int BAUD_RATE = 9600;
+
+        private readonly Dictionary<string, string> POST_HEADER = new Dictionary<string, string>()
+        {
+            {"Ocp-Apim-Subscription-Key", API_KEY},
+            {"Content-Type", "application/octet-stream"}
+        };
+        #endregion
+
+        private RedCharacter character;
 
         [SerializeField]
-        private RedCharacter character;
+        private float cameraDelay;
 
         private WebCamTexture webCamTex;
 
-        //SerialPort stream = new SerialPort("/dev/cu.usbmodem14411", 9600);
+        #region Routine
+        private Coroutine controllerRoutine;
+        private Coroutine cameraRoutine;
+        #endregion
+
+        private string controllerPortName = "COM1";
+        private string cameraPortName = "COM2";
+
+        private static ArduinoManager intance;
+        public static ArduinoManager Instance { get { return Instance; } }
 
 		private void Start()
 		{
-            //stream.Open();
             webCamTex = new WebCamTexture();
             Renderer renderer = this.GetComponent<Renderer>();
             renderer.material.mainTexture = webCamTex;
             webCamTex.Play();
+
+            character = (RedCharacter)(GameManager.Instance.MainCharacter);
 		}
-        
-		private void Update()
-		{
-            if (Input.GetKeyDown(KeyCode.A))
-            {
-                StartCoroutine(ProcessFaceAPI());
+
+        public void OnGameStart(){
+            if (controllerRoutine != null)
+                StopCoroutine(controllerRoutine);
+            if (cameraRoutine != null)
+                StopCoroutine(cameraRoutine);
+
+            controllerRoutine = StartCoroutine(ProcessController());
+            cameraRoutine = StartCoroutine(ProcessCamera());
+        }
+
+        public void SetControllerPortName(string name){
+            controllerPortName = name;
+        }
+
+        public void SetCameraPortName(string name){
+            cameraPortName = name;
+        }
+
+        private IEnumerator ProcessController(){
+            SerialPort stream = new SerialPort(controllerPortName, BAUD_RATE);
+            stream.Open();
+
+            while (true){
+                if (stream.IsOpen == false)
+                    continue;
+
+                if (character == null)
+                    continue;
+
+                //TODO : character handle
+                yield return null;
             }
+        }
 
-            /*
-            if (!stream.IsOpen)
-                return;
+        private IEnumerator ProcessCamera(){
+            SerialPort stream = new SerialPort(cameraPortName, BAUD_RATE);
+            stream.Open();
 
-            string value = stream.ReadExisting();
-            Debug.Log(value);
-            
-            switch(Int32.Parse(value)){
-                case 0:
-                    character.Move(-1);
-                    break;
-                case 1:
-                    character.Move(1);
-                    break;
-                case 2:
-                    character.Jump();
-                    break;
-                case 3:
-                    break;
+            while (true){
+                if (stream.IsOpen == false)
+                    continue;
+                
+                //TODO : camera byteArr 넘겨주기 
+                yield return StartCoroutine(ProcessFaceAPI());
+
+                yield return new WaitForSeconds(cameraDelay);
             }
-
-            stream.Write("test");*/
-		}
+        }
 
         private IEnumerator ProcessFaceAPI(){
-            yield return new WaitForEndOfFrame();
-            Texture2D _TextureFromCamera = new Texture2D(GetComponent<Renderer>().material.mainTexture.width,
-            GetComponent<Renderer>().material.mainTexture.height);
-            _TextureFromCamera.SetPixels((GetComponent<Renderer>().material.mainTexture as WebCamTexture).GetPixels());
-            _TextureFromCamera.Apply();
-            byte[] bytes = _TextureFromCamera.EncodeToJPG();
+            while (true){
+                Texture2D _TextureFromCamera = new Texture2D(GetComponent<Renderer>().material.mainTexture.width,
+                GetComponent<Renderer>().material.mainTexture.height);
+                _TextureFromCamera.SetPixels((GetComponent<Renderer>().material.mainTexture as WebCamTexture).GetPixels());
+                _TextureFromCamera.Apply();
+                byte[] bytes = _TextureFromCamera.EncodeToJPG();
 
-            Dictionary<string, string> postHeader = new Dictionary<string, string>();
-            postHeader.Add("Ocp-Apim-Subscription-Key", key);
-            postHeader.Add("Content-Type", "application/octet-stream");
-
-            WWW www = new WWW(url, bytes, postHeader);
-            yield return www;
-            if(www.error != null){
-                Debug.Log(www.error);
-            }else {
-                Debug.Log(www.text);
+                WWW www = new WWW(API_URL, bytes, POST_HEADER);
+                yield return www;
+                if (www.error != null){
+                    Debug.Log(www.error);
+                }
+                else{
+                    Debug.Log(www.text);
+                    // TODO : Json 파싱
+                    GameManager.Instance.HandleFaceAPIResult();
+                }
             }
         }
 	}

@@ -13,7 +13,7 @@ namespace RedRunner
 
 		private static UIManager m_Singleton;
 
-		public static UIManager Singleton
+		public static UIManager Instance
 		{
 			get
 			{
@@ -31,6 +31,11 @@ namespace RedRunner
 		private Texture2D m_CursorClickTexture;
 		[SerializeField]
 		private UIScreen m_PauseScreen;
+
+        [SerializeField]
+        private InputField controllerInputField;
+        [SerializeField]
+        private InputField cameraInputField;
 
 		void Awake ()
 		{
@@ -132,6 +137,19 @@ namespace RedRunner
 			}
 		}
 
+        public void OnControllerButtonClicked(){
+            if (controllerInputField == null || controllerInputField.text == null)
+                return;
+
+            ArduinoManager.Instance.SetControllerPortName(controllerInputField.text);
+        }
+
+        public void OnCameraButtonClicked(){
+            if (cameraInputField == null || cameraInputField.text == null)
+                return;
+
+            ArduinoManager.Instance.SetCameraPortName(cameraInputField.text);
+        }
 	}
 
 }

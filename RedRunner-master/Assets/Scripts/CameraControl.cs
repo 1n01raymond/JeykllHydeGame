@@ -30,7 +30,6 @@ public class CameraControl : MonoBehaviour
 	private float _shakeIntensity, _shakeSpeed, _baseX, _baseY;
 	private Vector3 _nextShakePosition;
 
-
 	void Start ()
 	{
 		enabled = false;
@@ -39,7 +38,6 @@ public class CameraControl : MonoBehaviour
 		_baseX = ShakeAxis.localPosition.x;
 		_baseY = ShakeAxis.localPosition.y;
 	}
-
 	
 	void Update ()
 	{

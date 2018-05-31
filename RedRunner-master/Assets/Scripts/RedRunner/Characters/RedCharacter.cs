@@ -294,7 +294,7 @@ namespace RedRunner.Characters
 
 		void Update ()
 		{
-			if ( !GameManager.Singleton.gameStarted || !GameManager.Singleton.gameRunning )
+            if ( !GameManager.Instance.gameStarted || !GameManager.Instance.gameRunning )
 			{
 				return;
 			}
