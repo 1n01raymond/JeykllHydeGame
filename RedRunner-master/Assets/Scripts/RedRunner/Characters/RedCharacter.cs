@@ -86,6 +86,7 @@ namespace RedRunner.Characters
 		protected Vector3 m_InitialScale;
 		protected Vector3 m_InitialPosition;
 
+        public bool isArduinoSet = false;
 		#endregion
 
 		#region Properties
@@ -274,6 +275,7 @@ namespace RedRunner.Characters
 			}
 		}
 
+
 		#endregion
 
 		#region MonoBehaviour Messages
@@ -314,13 +316,22 @@ namespace RedRunner.Characters
 				m_CurrentRunSpeed = Mathf.SmoothDamp ( m_Speed.x, m_MaxRunSpeed, ref m_CurrentSmoothVelocity, m_RunSmoothTime );
 			}
 
-            if (Input.GetKey(KeyCode.LeftArrow))
-                Move(-1);
-            else if (Input.GetKey(KeyCode.RightArrow))
-                Move(1);
+            if (!isArduinoSet)
+            {
+                if (Input.GetKey(KeyCode.LeftArrow))
+                    Move(-1);
+                else if (Input.GetKey(KeyCode.RightArrow))
+                    Move(1);
+                else
+                    Move(0);
 
-            if (Input.GetKeyUp(KeyCode.Space))
-                Jump();
+                if (Input.GetKeyUp(KeyCode.Space))
+                    Jump();
+
+                if(Input.GetKeyUp(KeyCode.LeftShift) || Input.GetKeyUp(KeyCode.RightShift)){
+                    Dash();
+                }
+            }
 
 			if ( m_IsDead && !m_ClosingEye )
 			{
@@ -345,21 +356,6 @@ namespace RedRunner.Characters
 					}
 				}
 			}
-
-            if ( Input.GetKeyUp ( KeyCode.A ) )
-			{
-				Vector2 force = new Vector2 ( 0f, 0f );
-				if ( transform.localScale.z > 0f )
-				{
-					force.x = m_RollForce;
-				}
-				else if ( transform.localScale.z < 0f )
-				{
-					force.x = -m_RollForce;
-				}
-
-                m_Rigidbody2D.velocity += force;
-			}
 		}
 
 		void LateUpdate ()
@@ -371,10 +367,6 @@ namespace RedRunner.Characters
 			m_Animator.SetBool ( "IsDead", m_IsDead );
 			m_Animator.SetBool ( "Block", m_Block );
 			m_Animator.SetBool ( "Guard", m_Guard );
-            if ( Input.GetKeyUp ( KeyCode.A ) )
-			{
-				m_Animator.SetTrigger ( "Roll" );
-			}
 		}
 
 		//		void OnCollisionEnter2D ( Collision2D collision2D )
@@ -482,6 +474,10 @@ namespace RedRunner.Characters
 				}
 			}
 		}
+
+        public void Dash(){
+            
+        }
 
 		public override void Die ()
 		{

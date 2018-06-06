@@ -150,6 +150,10 @@ namespace RedRunner
 
             ArduinoManager.Instance.SetCameraPortName(cameraInputField.text);
         }
+
+        public void AddHappy(float value){
+            
+        }
 	}
 
 }

@@ -5,6 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Networking;
+using UnityEngine.UI;
+using MiniJSON;
 
 namespace RedRunner
 {
@@ -27,6 +29,8 @@ namespace RedRunner
 
         [SerializeField]
         private float cameraDelay;
+        [SerializeField]
+        private RawImage camRenderer;
 
         private WebCamTexture webCamTex;
 
@@ -38,20 +42,30 @@ namespace RedRunner
         private string controllerPortName = "COM1";
         private string cameraPortName = "COM2";
 
-        private static ArduinoManager intance;
-        public static ArduinoManager Instance { get { return Instance; } }
+        private static ArduinoManager instance;
+        public static ArduinoManager Instance { get { return instance; } }
+
+		private void Awake()
+		{
+            if (instance != null)
+                Destroy(instance);
+            
+            instance = this;
+		}
 
 		private void Start()
 		{
             webCamTex = new WebCamTexture();
-            Renderer renderer = this.GetComponent<Renderer>();
-            renderer.material.mainTexture = webCamTex;
+
+            if(camRenderer != null)
+                camRenderer.material.mainTexture = webCamTex;
+            
             webCamTex.Play();
 
             character = (RedCharacter)(GameManager.Instance.MainCharacter);
 		}
 
-        public void OnGameStart(){
+		public void OnGameStart(){
             if (controllerRoutine != null)
                 StopCoroutine(controllerRoutine);
             if (cameraRoutine != null)
@@ -86,12 +100,12 @@ namespace RedRunner
         }
 
         private IEnumerator ProcessCamera(){
-            SerialPort stream = new SerialPort(cameraPortName, BAUD_RATE);
-            stream.Open();
+            //SerialPort stream = new SerialPort(cameraPortName, BAUD_RATE);
+            //stream.Open();
 
             while (true){
-                if (stream.IsOpen == false)
-                    continue;
+                //if (stream.IsOpen == false)
+                //    continue;
                 
                 //TODO : camera byteArr 넘겨주기 
                 yield return StartCoroutine(ProcessFaceAPI());
@@ -101,23 +115,39 @@ namespace RedRunner
         }
 
         private IEnumerator ProcessFaceAPI(){
-            while (true){
-                Texture2D _TextureFromCamera = new Texture2D(GetComponent<Renderer>().material.mainTexture.width,
-                GetComponent<Renderer>().material.mainTexture.height);
-                _TextureFromCamera.SetPixels((GetComponent<Renderer>().material.mainTexture as WebCamTexture).GetPixels());
-                _TextureFromCamera.Apply();
-                byte[] bytes = _TextureFromCamera.EncodeToJPG();
+            if (camRenderer == null)
+                yield break;
 
-                WWW www = new WWW(API_URL, bytes, POST_HEADER);
-                yield return www;
-                if (www.error != null){
-                    Debug.Log(www.error);
-                }
-                else{
-                    Debug.Log(www.text);
-                    // TODO : Json 파싱
+            Texture2D _TextureFromCamera = new Texture2D(camRenderer.material.mainTexture.width,
+            camRenderer.material.mainTexture.height);
+            _TextureFromCamera.SetPixels((camRenderer.material.mainTexture as WebCamTexture).GetPixels());
+            _TextureFromCamera.Apply();
+            byte[] bytes = _TextureFromCamera.EncodeToJPG();
+
+            WWW www = new WWW(API_URL, bytes, POST_HEADER);
+            yield return www;
+            if (www.error != null){
+                Debug.Log(www.error);
+            }
+            else{
+                try
+                {
+                    var l = (List<object>)Json.Deserialize(www.text);
+                    var fa = ((Dictionary<string, object>)l[0])["faceAttributes"];
+                    var emotion = (Dictionary<string, object>)(((Dictionary<string, object>)fa)["emotion"]);
+
+                    var happy = (double)(emotion["happiness"]);
+
+                    if(happy > 0.5)
+                    { 
+                        Debug.Log("HAPPY : " + happy);
+                    }else
+                        Debug.Log("NOT HAPPY : " + happy);
+
                     GameManager.Instance.HandleFaceAPIResult();
+
                 }
+                catch(Exception e){Debug.Log("Parsing FAIL");}
             }
         }
 	}

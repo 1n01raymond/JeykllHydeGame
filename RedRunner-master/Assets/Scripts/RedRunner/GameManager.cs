@@ -230,6 +230,7 @@ namespace RedRunner
 		{
 			m_GameStarted = true;
 			ResumeGame ();
+            ArduinoManager.Instance.OnGameStart();
 		}
 
 		public void StopGame ()
@@ -284,7 +285,9 @@ namespace RedRunner
 		}
 
         public void HandleFaceAPIResult(){
-            
+
+            //handle character speed
+            //handle UI gauge
         }
 
 	}
