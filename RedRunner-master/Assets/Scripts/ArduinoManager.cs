@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using MiniJSON;
+using System.IO;
 
 namespace RedRunner
 {
@@ -23,14 +24,15 @@ namespace RedRunner
             {"Ocp-Apim-Subscription-Key", API_KEY},
             {"Content-Type", "application/octet-stream"}
         };
+
+        private readonly string PHOTO_DIR = "";
+        private const float cameraDelay = 1;
         #endregion
 
         private RedCharacter character;
 
         [SerializeField]
-        private float cameraDelay;
-        [SerializeField]
-        private RawImage camRenderer;
+        private Image camRenderer;
 
         private WebCamTexture webCamTex;
 
@@ -39,7 +41,7 @@ namespace RedRunner
         private Coroutine cameraRoutine;
         #endregion
 
-        private string controllerPortName = "COM1";
+        private string controllerPortName = "/dev/cu.usbmodem14111";
         private string cameraPortName = "COM2";
 
         private static ArduinoManager instance;
@@ -72,7 +74,7 @@ namespace RedRunner
                 StopCoroutine(cameraRoutine);
 
             controllerRoutine = StartCoroutine(ProcessController());
-            cameraRoutine = StartCoroutine(ProcessCamera());
+            //cameraRoutine = StartCoroutine(ProcessCamera());
         }
 
         public void SetControllerPortName(string name){
@@ -87,6 +89,9 @@ namespace RedRunner
             SerialPort stream = new SerialPort(controllerPortName, BAUD_RATE);
             stream.Open();
 
+            //ms
+            stream.ReadTimeout = 30;
+
             while (true){
                 if (stream.IsOpen == false)
                     continue;
@@ -94,21 +99,50 @@ namespace RedRunner
                 if (character == null)
                     continue;
 
-                //TODO : character handle
-                yield return null;
+                try
+                {
+                    string value = stream.ReadExisting();
+                    if (string.IsNullOrEmpty(value))
+                        character.Move(0);
+                    else
+                    {
+                        var values = value.Split(',');
+
+                        Debug.Log(values[0]);
+                        switch (Int32.Parse(values[0]))
+                        {
+                            case 0:
+                                character.Move(-1);
+                                break;
+                            case 1:
+                                character.Move(1);
+                                break;
+                            case 2:
+                                character.Jump();
+                                break;
+                            case 3:
+                                character.Dash();
+                                break;
+                            default:
+                                character.Move(0);
+                                break;
+                        }
+                    }
+                }catch(TimeoutException e){
+                    //Debug.Log("TimeOut Exception");
+                }catch(Exception e){
+                }
+
+                yield return new WaitForEndOfFrame();
             }
         }
 
         private IEnumerator ProcessCamera(){
-            //SerialPort stream = new SerialPort(cameraPortName, BAUD_RATE);
-            //stream.Open();
 
             while (true){
-                //if (stream.IsOpen == false)
-                //    continue;
-                
-                //TODO : camera byteArr 넘겨주기 
-                yield return StartCoroutine(ProcessFaceAPI());
+                //Get JPG
+
+                //yield return StartCoroutine(ProcessFaceAPI());
 
                 yield return new WaitForSeconds(cameraDelay);
             }
@@ -119,7 +153,7 @@ namespace RedRunner
                 yield break;
 
             Texture2D _TextureFromCamera = new Texture2D(camRenderer.material.mainTexture.width,
-            camRenderer.material.mainTexture.height);
+                                                         camRenderer.material.mainTexture.height);
             _TextureFromCamera.SetPixels((camRenderer.material.mainTexture as WebCamTexture).GetPixels());
             _TextureFromCamera.Apply();
             byte[] bytes = _TextureFromCamera.EncodeToJPG();
@@ -138,13 +172,15 @@ namespace RedRunner
 
                     var happy = (double)(emotion["happiness"]);
 
+                    /*
                     if(happy > 0.5)
                     { 
                         Debug.Log("HAPPY : " + happy);
                     }else
                         Debug.Log("NOT HAPPY : " + happy);
+                    */
 
-                    GameManager.Instance.HandleFaceAPIResult();
+                    GameManager.Instance.HandleFaceAPIResult(happy);
 
                 }
                 catch(Exception e){Debug.Log("Parsing FAIL");}

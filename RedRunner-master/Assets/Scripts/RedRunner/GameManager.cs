@@ -231,6 +231,7 @@ namespace RedRunner
 			m_GameStarted = true;
 			ResumeGame ();
             ArduinoManager.Instance.OnGameStart();
+            UIManager.Instance.StartHappySlider();
 		}
 
 		public void StopGame ()
@@ -284,10 +285,14 @@ namespace RedRunner
 			
 		}
 
-        public void HandleFaceAPIResult(){
+        public void HandleFaceAPIResult(double value){
+
+            if(value > 0.5){
+                //handle UI gauge
+                UIManager.Instance.AddHappy(0.1f);
+            }
 
             //handle character speed
-            //handle UI gauge
         }
 
 	}

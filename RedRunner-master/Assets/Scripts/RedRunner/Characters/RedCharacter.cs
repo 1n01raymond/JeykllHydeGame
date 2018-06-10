@@ -275,7 +275,7 @@ namespace RedRunner.Characters
 			}
 		}
 
-
+        private bool isDash;
 		#endregion
 
 		#region MonoBehaviour Messages
@@ -433,7 +433,7 @@ namespace RedRunner.Characters
 
 		public override void Move ( float horizontalAxis )
 		{
-			if ( !m_IsDead )
+            if ( !m_IsDead && !isDash)
 			{
 				float speed = m_CurrentRunSpeed;
 //				if ( CrossPlatformInputManager.GetButton ( "Walk" ) )
@@ -460,7 +460,7 @@ namespace RedRunner.Characters
 
 		public override void Jump ()
 		{
-			if ( !m_IsDead )
+            if ( !m_IsDead && !isDash)
 			{
 				if ( m_GroundCheck.IsGrounded )
 				{
@@ -476,7 +476,21 @@ namespace RedRunner.Characters
 		}
 
         public void Dash(){
-            
+            if(!isDash)
+                StartCoroutine(DashRoutine(transform.localScale.x < 0 ? -1000 : 1000));
+        }
+
+        public IEnumerator DashRoutine(float vel){
+            isDash = true;
+            m_Animator.SetTrigger("Roll");
+            Vector2 curVelocity = m_Rigidbody2D.velocity;
+
+            m_Rigidbody2D.AddForce(Vector2.right * vel);
+
+            yield return new WaitForSeconds(0.5f);
+
+            m_Rigidbody2D.velocity = curVelocity;
+            isDash = false;
         }
 
 		public override void Die ()
@@ -560,6 +574,7 @@ namespace RedRunner.Characters
 		{
 			
 		}
+
 
 	}
 

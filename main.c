@@ -16,7 +16,7 @@ int JOY_RIGHT = 1;
 
 //int JOY_UP = 0;
 //int JOY_DOWN = 1;
-
+x
 int BTN_JUMP = 2;
 int BTN_DASH = 3;
 

@@ -37,6 +37,11 @@ namespace RedRunner
         [SerializeField]
         private InputField cameraInputField;
 
+        [SerializeField]
+        private Slider happySlider;
+
+        private float happyValue = 0;
+
 		void Awake ()
 		{
 			if ( m_Singleton != null )
@@ -152,7 +157,21 @@ namespace RedRunner
         }
 
         public void AddHappy(float value){
-            
+            happyValue += value;
+        }
+
+        public void StartHappySlider(){
+            StartCoroutine(UpdateSlider());
+        }
+
+        private IEnumerator UpdateSlider(){
+            while (true)
+            {
+                happySlider.value = happyValue;
+                if(happyValue > 0)
+                    happyValue -= 0.0003f;
+                yield return new WaitForEndOfFrame();
+            }
         }
 	}
 
