@@ -1,7 +1,3 @@
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
-LiquidCrystal_I2C lcd(0x27,16,2);
-
 int DELAY_TIME = 20; //Serial
 
 int X = A0; // x
@@ -16,7 +12,6 @@ int JOY_RIGHT = 1;
 
 //int JOY_UP = 0;
 //int JOY_DOWN = 1;
-x
 int BTN_JUMP = 2;
 int BTN_DASH = 3;
 
@@ -33,9 +28,6 @@ void setup()
   
   pinMode(BTN1, INPUT);
   pinMode(BTN2, INPUT);
-  
-  lcd.begin(); // lcd를 사용을 시작합니다.
-  lcd.backlight(); // backlight를 On 시킵니다.
 }
 
 void loop()
@@ -59,51 +51,31 @@ void loop()
   if(x>=0 && x<=200)
   {
     Serial.print(JOY_LEFT);
+    Serial.print(',');
     delay(DELAY_TIME);
   } 
   else if(x>=900 && x<=1023)
   {
-    Serial.print(x);
+    Serial.print(JOY_RIGHT);
+    Serial.print(',');
     delay(DELAY_TIME);
   }
   else if(x>=400 && x<=600)
   {
-    Serial.print(JOY_STOP);
     delay(DELAY_TIME);
   }
   
   if(digitalRead(BTN1) == HIGH)
   { 
     Serial.print(BTN_JUMP);
+    Serial.print(',');
     delay(DELAY_TIME);
   }
   if(digitalRead(BTN2) == HIGH)
   {
     Serial.print(BTN_DASH);
+    Serial.print(',');
     delay(DELAY_TIME);
   }
-  
-  ReadSerialAndShowLCD();
 }
 
-void ReadSerialAndShowLCD()
-{
-  //한바이트 데이터를 임시 저장
-  char cTemp;
-  //완성된 명령어
-  String sCommand = "";
-  String sTemp = "";
-  sCommand = "";
-  while(Serial.available())
-  {
-    cTemp = Serial.read();
-    sCommand.concat(cTemp);
-  }
-  //완성된 데이터가 있는지 확인 한다.
-  if(sCommand != "" )
-  {
-    lcd.clear();
-    lcd.home(); 
-    lcd.print(sCommand);
-  }
-}
