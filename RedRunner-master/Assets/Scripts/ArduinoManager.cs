@@ -8,6 +8,7 @@ using UnityEngine.Networking;
 using UnityEngine.UI;
 using MiniJSON;
 using System.IO;
+using B83.Image.BMP;
 
 namespace RedRunner
 {
@@ -16,6 +17,8 @@ namespace RedRunner
         #region Constants
         private static readonly string API_URL = "https://eastasia.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceAttributes=emotion";
         private static readonly string API_KEY = "4c01340088d245a9a7832850a5313107";
+
+        private static readonly string BMP_DIR = "c\\";
 
         private const int BAUD_RATE = 9600;
 
@@ -26,15 +29,13 @@ namespace RedRunner
         };
 
         private readonly string PHOTO_DIR = "";
-        private const float cameraDelay = 1;
+        private const float cameraDelay = 2;
         #endregion
 
         private RedCharacter character;
 
         [SerializeField]
         private Image camRenderer;
-
-        private WebCamTexture webCamTex;
 
         #region Routine
         private Coroutine controllerRoutine;
@@ -47,6 +48,8 @@ namespace RedRunner
         private static ArduinoManager instance;
         public static ArduinoManager Instance { get { return instance; } }
 
+        private BMPLoader bmpLoader;
+
 		private void Awake()
 		{
             if (instance != null)
@@ -57,13 +60,7 @@ namespace RedRunner
 
 		private void Start()
 		{
-            webCamTex = new WebCamTexture();
-
-            if(camRenderer != null)
-                camRenderer.material.mainTexture = webCamTex;
-            
-            webCamTex.Play();
-
+            bmpLoader = new BMPLoader();
             character = (RedCharacter)(GameManager.Instance.MainCharacter);
 		}
 
@@ -152,6 +149,12 @@ namespace RedRunner
             if (camRenderer == null)
                 yield break;
 
+            //TODO : bmp file checkings
+
+            string faceDir = BMP_DIR + "\\image.bmp";
+
+            camRenderer.material.mainTexture = bmpLoader.LoadBMP(faceDir).ToTexture2D();
+            
             Texture2D _TextureFromCamera = new Texture2D(camRenderer.material.mainTexture.width,
                                                          camRenderer.material.mainTexture.height);
             _TextureFromCamera.SetPixels((camRenderer.material.mainTexture as WebCamTexture).GetPixels());
