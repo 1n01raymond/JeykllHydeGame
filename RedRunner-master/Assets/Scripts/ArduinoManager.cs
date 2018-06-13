@@ -71,7 +71,8 @@ namespace RedRunner
                 StopCoroutine(cameraRoutine);
 
             controllerRoutine = StartCoroutine(ProcessController());
-            //cameraRoutine = StartCoroutine(ProcessCamera());
+            cameraRoutine = StartCoroutine(ProcessCamera());
+            StartBGM();
         }
 
         public void SetControllerPortName(string name){
@@ -80,6 +81,18 @@ namespace RedRunner
 
         public void SetCameraPortName(string name){
             cameraPortName = name;
+        }
+
+        public void StartBGM(){
+            
+        }
+
+        public void PlayJumpSound(){
+            
+        }
+
+        public void PlayDashSound(){
+            
         }
 
         private IEnumerator ProcessController(){

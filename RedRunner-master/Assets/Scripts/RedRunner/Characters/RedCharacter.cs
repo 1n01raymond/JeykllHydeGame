@@ -477,6 +477,7 @@ namespace RedRunner.Characters
 					m_Animator.SetTrigger ( "Jump" );
 					m_JumpParticleSystem.Play ();
 					AudioManager.Singleton.PlayJumpSound ( m_JumpAndGroundedAudioSource );
+                    ArduinoManager.Instance.PlayJumpSound();
 				}
 			}
 		}
@@ -488,6 +489,7 @@ namespace RedRunner.Characters
 
         public IEnumerator DashRoutine(float vel){
             isDash = true;
+            ArduinoManager.Instance.PlayDashSound();
             m_Animator.SetTrigger("Roll");
             Vector2 curVelocity = m_Rigidbody2D.velocity;
             vel = vel + (vel * happyValue);
