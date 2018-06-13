@@ -153,23 +153,41 @@ namespace RedRunner
         private IEnumerator ProcessCamera(){
 
             while (true){
-                //Get JPG
+                if (camRenderer == null)
+                {
+                    yield return new WaitForSeconds(cameraDelay);
+                    continue;
+                }
 
-                //yield return StartCoroutine(ProcessFaceAPI());
+                var files = Directory.GetFiles(BMP_DIR);
+                string faceDir = string.Empty;
+                foreach(string file in files){
+                    if (file.Contains("face"))
+                    {
+                        faceDir = file;
+                        break;
+                    }
+                }
+                
+                if (faceDir.Equals(string.Empty) || !File.Exists(faceDir))
+                {
+                    yield return new WaitForSeconds(cameraDelay);
+                    continue;
+                }
 
+                yield return StartCoroutine(ProcessFaceAPI(bmpLoader.LoadBMP(faceDir).ToTexture2D()));
+
+                foreach(string file in files){
+                    if (File.Exists(file))
+                        File.Delete(file);
+                }
                 yield return new WaitForSeconds(cameraDelay);
             }
         }
 
-        private IEnumerator ProcessFaceAPI(){
-            if (camRenderer == null)
-                yield break;
+        private IEnumerator ProcessFaceAPI(Texture2D texture){
 
-            //TODO : bmp file checkings
-
-            string faceDir = BMP_DIR + "\\image.bmp";
-
-            camRenderer.material.mainTexture = bmpLoader.LoadBMP(faceDir).ToTexture2D();
+            camRenderer.material.mainTexture = texture;
             
             Texture2D _TextureFromCamera = new Texture2D(camRenderer.material.mainTexture.width,
                                                          camRenderer.material.mainTexture.height);
