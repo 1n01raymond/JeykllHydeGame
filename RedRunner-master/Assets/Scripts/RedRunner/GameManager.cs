@@ -57,6 +57,8 @@ namespace RedRunner
 		private bool m_GameRunning = false;
 		private bool m_AudioEnabled = true;
 
+        private float m_happyValue = 0;
+
         public Character MainCharacter{
             get {
                 return m_MainCharacter;
@@ -231,6 +233,7 @@ namespace RedRunner
 			m_GameStarted = true;
 			ResumeGame ();
             ArduinoManager.Instance.OnGameStart();
+            StartCoroutine(UpdateHappyValue());
             UIManager.Instance.StartHappySlider();
 		}
 
@@ -286,13 +289,23 @@ namespace RedRunner
 		}
 
         public void HandleFaceAPIResult(double value){
-
-            if(value > 0.5){
-                //handle UI gauge
-                UIManager.Instance.AddHappy(0.1f);
+            if(value > 0.5 && m_happyValue < 1.0f){
+                m_happyValue += 0.1f;
             }
+        }
 
-            //handle character speed
+        private IEnumerator UpdateHappyValue(){
+            while (true)
+            {
+                UIManager.Instance.SetHappy(m_happyValue);
+                //handle character speed
+                m_MainCharacter.SetHappy(m_happyValue);
+
+                if(m_happyValue > 0)
+                    m_happyValue -= 0.0003f;
+                
+                yield return new WaitForEndOfFrame();
+            }
         }
 
 	}

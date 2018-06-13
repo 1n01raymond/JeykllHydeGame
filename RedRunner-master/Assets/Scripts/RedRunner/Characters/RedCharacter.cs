@@ -86,7 +86,7 @@ namespace RedRunner.Characters
 		protected Vector3 m_InitialScale;
 		protected Vector3 m_InitialPosition;
 
-        public bool isArduinoSet = false;
+        public bool isArduinoSet = true;
 		#endregion
 
 		#region Properties
@@ -276,6 +276,7 @@ namespace RedRunner.Characters
 		}
 
         private bool isDash;
+        private float happyValue = 0;
 		#endregion
 
 		#region MonoBehaviour Messages
@@ -435,7 +436,7 @@ namespace RedRunner.Characters
 		{
             if ( !m_IsDead && !isDash)
 			{
-				float speed = m_CurrentRunSpeed;
+                float speed = m_CurrentRunSpeed + (m_CurrentRunSpeed * happyValue);
 //				if ( CrossPlatformInputManager.GetButton ( "Walk" ) )
 //				{
 //					speed = m_WalkSpeed;
@@ -456,6 +457,11 @@ namespace RedRunner.Characters
 					transform.localScale = scale;
 				}
 			}
+		}
+
+		public override void SetHappy(float value)
+		{
+            happyValue = value;
 		}
 
 		public override void Jump ()
@@ -484,7 +490,7 @@ namespace RedRunner.Characters
             isDash = true;
             m_Animator.SetTrigger("Roll");
             Vector2 curVelocity = m_Rigidbody2D.velocity;
-
+            vel = vel + (vel * happyValue);
             m_Rigidbody2D.AddForce(Vector2.right * vel);
 
             yield return new WaitForSeconds(0.5f);

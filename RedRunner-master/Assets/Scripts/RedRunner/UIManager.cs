@@ -156,8 +156,8 @@ namespace RedRunner
             ArduinoManager.Instance.SetCameraPortName(cameraInputField.text);
         }
 
-        public void AddHappy(float value){
-            happyValue += value;
+        public void SetHappy(float value){
+            happyValue = value;
         }
 
         public void StartHappySlider(){
@@ -168,8 +168,6 @@ namespace RedRunner
             while (true)
             {
                 happySlider.value = happyValue;
-                if(happyValue > 0)
-                    happyValue -= 0.0003f;
                 yield return new WaitForEndOfFrame();
             }
         }

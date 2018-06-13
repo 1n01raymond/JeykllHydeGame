@@ -76,6 +76,7 @@ namespace RedRunner.Characters
 
 		public abstract void Reset ();
 
+        public abstract void SetHappy(float value);
 	}
 
 }
