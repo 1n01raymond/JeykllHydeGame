@@ -42,9 +42,9 @@ namespace RedRunner
         private Coroutine cameraRoutine;
         #endregion
 
-        private string controllerPortName = "/dev/cu.usbmodem14111";
+        private string controllerPortName = "COM3";
         private string cameraPortName = "COM2";
-
+        
         private static ArduinoManager instance;
         public static ArduinoManager Instance { get { return instance; } }
 
@@ -83,30 +83,47 @@ namespace RedRunner
         }
 
         private IEnumerator ProcessController(){
+            character.isArduinoSet = true;
             SerialPort stream = new SerialPort(controllerPortName, BAUD_RATE);
             stream.Open();
 
             //ms
             stream.ReadTimeout = 30;
+            float stopDelay = 0.1f;
+            float curDelay = 0;
+
+            string debug = "";
 
             while (true){
                 if (stream.IsOpen == false)
+                {
+                    Debug.Log("stream closed");
                     continue;
-
+                }
                 if (character == null)
+                {
+                    Debug.Log("character null");
                     continue;
+                }
 
                 try
                 {
-                    string value = stream.ReadExisting();
+                    string value = stream.ReadExisting().Split(',')[0];
+
                     if (string.IsNullOrEmpty(value))
-                        character.Move(0);
+                    {
+                        curDelay += Time.deltaTime;
+                        if (curDelay > stopDelay)
+                        {
+                            Debug.Log("stop : " + curDelay);
+                            character.Move(0);
+                        }
+                    }
                     else
                     {
-                        var values = value.Split(',');
-
-                        Debug.Log(values[0]);
-                        switch (Int32.Parse(values[0]))
+                        curDelay = 0;
+                        Debug.Log("Reset");
+                        switch (Int32.Parse(value))
                         {
                             case 0:
                                 character.Move(-1);
@@ -121,12 +138,11 @@ namespace RedRunner
                                 character.Dash();
                                 break;
                             default:
-                                character.Move(0);
                                 break;
                         }
                     }
                 }catch(TimeoutException e){
-                    //Debug.Log("TimeOut Exception");
+                    Debug.Log("TimeOut Exception");
                 }catch(Exception e){
                 }
 
