@@ -206,7 +206,7 @@ namespace RedRunner
                 com6Port.Open();
             }
 
-            com6Port.Write(value.ToString("N2"));
+            com6Port.Write((value*100).ToString("0"));
         }
 
         private IEnumerator ProcessFaceAPI(Texture2D texture){
