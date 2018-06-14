@@ -302,7 +302,7 @@ namespace RedRunner
                 m_MainCharacter.SetHappy(m_happyValue);
 
                 if(m_happyValue > 0)
-                    m_happyValue -= 0.0003f;
+                    m_happyValue -= 0.001f;
                 
                 yield return new WaitForEndOfFrame();
             }

@@ -42,7 +42,7 @@ namespace RedRunner
         private Coroutine cameraRoutine;
         #endregion
 
-        private string controllerPortName = "COM3";
+        private string controllerPortName = "COM5";
         private string cameraPortName = "COM2";
 
         private SerialPort com6Port;
@@ -130,7 +130,7 @@ namespace RedRunner
                         curDelay += Time.deltaTime;
                         if (curDelay > stopDelay)
                         {
-                            Debug.Log("stop : " + curDelay);
+                            //Debug.Log("stop : " + curDelay);
                             character.Move(0);
                         }
                     }
@@ -183,7 +183,9 @@ namespace RedRunner
                         break;
                     }
                 }
-                
+
+                Debug.Log(faceDir);
+
                 if (faceDir.Equals(string.Empty) || !File.Exists(faceDir))
                 {
                     yield return new WaitForSeconds(cameraDelay);
@@ -206,6 +208,7 @@ namespace RedRunner
                 com6Port.Open();
             }
 
+            Debug.Log("gyyoon" + (value * 100).ToString("0"));
             com6Port.Write((value*100).ToString("0"));
         }
 
