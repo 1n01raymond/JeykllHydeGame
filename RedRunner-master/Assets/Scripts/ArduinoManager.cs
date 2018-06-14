@@ -18,7 +18,7 @@ namespace RedRunner
         private static readonly string API_URL = "https://eastasia.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceAttributes=emotion";
         private static readonly string API_KEY = "4c01340088d245a9a7832850a5313107";
 
-        private static readonly string BMP_DIR = "c\\";
+        private static readonly string BMP_DIR = @"c:\out\";
 
         private const int BAUD_RATE = 9600;
 
@@ -44,6 +44,8 @@ namespace RedRunner
 
         private string controllerPortName = "COM3";
         private string cameraPortName = "COM2";
+
+        private SerialPort com6Port;
         
         private static ArduinoManager instance;
         public static ArduinoManager Instance { get { return instance; } }
@@ -175,7 +177,7 @@ namespace RedRunner
                 var files = Directory.GetFiles(BMP_DIR);
                 string faceDir = string.Empty;
                 foreach(string file in files){
-                    if (file.Contains("face"))
+                    if (file.EndsWith(".bmp"))
                     {
                         faceDir = file;
                         break;
@@ -198,13 +200,22 @@ namespace RedRunner
             }
         }
 
+        private void SendCOM6(double value){
+            if(com6Port == null){
+                com6Port = new SerialPort("COM6", BAUD_RATE);
+                com6Port.Open();
+            }
+
+            com6Port.Write(value.ToString("N2"));
+        }
+
         private IEnumerator ProcessFaceAPI(Texture2D texture){
 
             camRenderer.material.mainTexture = texture;
             
             Texture2D _TextureFromCamera = new Texture2D(camRenderer.material.mainTexture.width,
                                                          camRenderer.material.mainTexture.height);
-            _TextureFromCamera.SetPixels((camRenderer.material.mainTexture as WebCamTexture).GetPixels());
+            _TextureFromCamera.SetPixels((camRenderer.material.mainTexture as Texture2D).GetPixels());
             _TextureFromCamera.Apply();
             byte[] bytes = _TextureFromCamera.EncodeToJPG();
 
@@ -231,7 +242,7 @@ namespace RedRunner
                     */
 
                     GameManager.Instance.HandleFaceAPIResult(happy);
-
+                    SendCOM6(happy);
                 }
                 catch(Exception e){Debug.Log("Parsing FAIL");}
             }
